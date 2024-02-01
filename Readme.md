@@ -1756,3 +1756,696 @@ In Node.js, Bcrypt provides a secure and efficient way to hash passwords. It aut
 - **Ease of Use:** Bcrypt is user-friendly, making it easy to incorporate password hashing into your Node.js applications.
 
 Using Bcrypt for password hashing is considered a best practice in web development for securing user credentials. It addresses many of the common vulnerabilities associated with storing passwords and provides a solid foundation for authentication security in Node.js applications.
+
+
+
+
+## login and signup API with bcrypt
+
+```javascript
+//server.js
+const express = require('express');
+const app = express();
+app.use(express.json())
+
+// Import the routes module
+const routes = require('./UserRoute');
+
+// Use the routes module for the "/pages" path
+app.use('/pages', routes);
+
+app.listen(8800,()=>{
+    console.log("server is running fine")
+})
+```
+
+```javascript
+//userRouter()
+
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcrypt')
+// const saltRound = 10;
+
+let arr = []
+router.post('/register',(req,res)=>{
+    const data = req.body
+    console.log(data)
+    // const randomvalue = bcrypt.genSaltSync(saltRound)
+    //     console.log(randomvalue,"generateSalt")
+
+    let account = arr.find(item=>item.email===loginData.email)
+    if(account){
+        return res.send("This email is already exist")
+    }
+    data.mobile = bcrypt.hashSync(data.mobile, 10);
+    // console.log(hashpass, "hashed password");
+    arr.push(data);
+    console.log(arr,"database")
+        return res.send("user is registered")
+    })
+
+router.post('/login',async(req,res)=>{
+    const loginData = req.body
+    // console.log(data)
+    let account = arr.find(item=>item.email===loginData.email)
+    console.log(account)
+    if(!account){
+        return  res.send("user is not registered")
+      }
+        const validate = await bcrypt.compare(loginData.mobile,account.mobile)
+        if(validate){
+           return res.send("user logged in ")
+        }
+        else{
+            return res.send("password is wrong")
+        }
+})
+
+module.exports = router
+```
+
+Authentication and authorization are two fundamental concepts in the field of security, particularly in the context of computer systems and applications.
+
+### Authentication:
+When we are talking about authentication then we say that if a
+person is providing his credential we will be checking if his credentials are correct
+or not or if he is already an existing user or not
+
+**Definition:**
+Authentication is the process of verifying the identity of a user, system, or entity. It is the mechanism by which a system validates the claimed identity of an entity, typically through the presentation of credentials such as usernames and passwords, biometric data, security tokens, or other authentication factors.
+
+**Purpose:**
+The primary goal of authentication is to ensure that the user or entity accessing a system is who they claim to be.
+
+**Key Components:**
+1. **Credentials:** Information provided by the user to prove their identity.
+2. **Authentication Factors:** Something the user knows (password), something the user has (security token), or something the user is (biometric data).
+
+### Authorization:
+When we are talking about authorization then we check that the
+user who has logged is having access for this specific data or not. For example,
+an Uber driver can not book the cab from the same account with which he has
+logged in Uber application as driver.
+
+**Definition:**
+Authorization is the process of granting or denying access to specific resources, functionalities, or actions based on the authenticated user's privileges and permissions. It is the mechanism that determines what actions a user or system is allowed to perform within a given system or application.
+
+**Purpose:**
+The primary goal of authorization is to control and restrict access to resources, ensuring that users have appropriate permissions to perform specific actions.
+
+**Key Components:**
+1. **Roles and Permissions:** Users are assigned roles, and roles are associated with specific permissions or access levels.
+2. **Access Control Lists (ACLs):** Lists that define what actions or operations a particular user or system is allowed or denied.
+
+### Differences:
+
+1. **Focus:**
+   - **Authentication:** Centers on verifying identity.
+   - **Authorization:** Centers on granting or denying access based on identity.
+
+2. **Goal:**
+   - **Authentication:** Ensures that a user is who they claim to be.
+   - **Authorization:** Controls what a user can or cannot do after authentication.
+
+3. **Process:**
+   - **Authentication:** Involves verifying identity through the presentation of credentials or other authentication factors.
+   - **Authorization:** Involves determining what actions or resources a user is allowed to access based on their authenticated identity.
+
+4. **Key Components:**
+   - **Authentication:** Credentials, authentication factors.
+   - **Authorization:** Roles, permissions, access control lists.
+
+5. **Timing:**
+   - **Authentication:** Typically occurs first in the user access process.
+   - **Authorization:** Occurs after authentication and is dependent on the authenticated user's identity.
+
+6. **Example:**
+   - **Authentication:** Verifying a user's username and password during login.
+   - **Authorization:** Determining whether a user has the permission to delete a file after successful authentication.
+
+### Relationship:
+
+Authentication and authorization work hand in hand in the context of user access control. After a user is authenticated (proven to be who they claim to be), the system then uses authorization mechanisms to determine what that authenticated user is allowed to do or access.
+
+
+
+### What is JSON Web Token (JWT)?
+
+A JSON Web Token (JWT) is a compact, URL-safe means of representing claims between two parties. These claims are typically used for authentication and authorization purposes. JWTs are commonly used in web development to securely transmit information between parties, especially between a client and a server.
+
+JWTs are mainly used for authentication. After a user signs in to an application, the application then assigns JWT to that user. Subsequent requests by the user will include the assigned JWT. This token tells the server what routes, services, and resources the user is allowed to access.
+
+### Advantages of Node.js Authentication with JWT:
+
+1. **Stateless Authentication:**
+   - JWTs enable stateless authentication, meaning the server doesn't need to store the user's session information. This makes it easier to scale applications horizontally.
+
+2. **Cross-Domain Authorization:**
+   - JWTs can be used across different domains, making them suitable for microservices architectures and distributed systems.
+
+3. **Security:**
+   - JWTs can be signed and optionally encrypted, providing a secure way to transmit data between parties. The signature ensures data integrity, and encryption adds an extra layer of confidentiality.
+
+4. **Reduced Database Load:**
+   - Since JWTs are self-contained and include necessary information, there's no need to query the database for user information on every request. This reduces the load on the database.
+
+5. **Flexibility:**
+   - JWTs are flexible and can include custom claims, allowing developers to encode additional information beyond standard user authentication details.
+
+6. **Efficient Communication:**
+   - Being compact and URL-safe, JWTs are efficient for transmitting information over the network. They are commonly used in HTTP headers or query parameters.
+
+### The Need for JSON Web Token:
+
+The need for JWT arises from challenges associated with traditional session-based authentication:
+
+1. **Statelessness:**
+   - HTTP is a stateless protocol, and maintaining user sessions traditionally requires server-side storage or database queries. JWTs allow stateless authentication by encoding user information directly into the token.
+
+2. **Cross-Domain Communication:**
+   - Cookies, traditionally used for session management, have domain restrictions. JWTs can be used across different domains, making them suitable for modern web applications with separate frontend and backend servers.
+
+3. **Scalability:**
+   - Stateless authentication is crucial for horizontal scalability. As applications grow, stateless solutions like JWTs make it easier to distribute authentication responsibilities.
+
+### Structure of a JWT:
+
+A JWT consists of three parts: a header, a payload, and a signature. These parts are base64-encoded and concatenated with periods (`.`) to form the final JWT.
+
+1. **Header:**
+   - Contains information about the type of token and the signing algorithm used. Example:
+     ```json
+     {
+       "alg": "HS256",
+       "typ": "JWT"
+     }
+     ```
+
+2. **Payload:**
+   - Contains claims. Claims are statements about an entity (typically, the user) and additional metadata. Example:
+     ```json
+     {
+       "sub": "1234567890",
+       "name": "John Doe",
+       "iat": 1516239022
+     }
+     ```
+
+3. **Signature:**
+   - Created by combining the encoded header, encoded payload, and a secret. The signature ensures the integrity of the token. Example:
+     ```
+     HMACSHA256(
+       base64UrlEncode(header) + "." +
+       base64UrlEncode(payload),
+       secret
+     )
+     ```
+
+### JWT Use Cases:
+
+1. **Authentication:**
+   - JWTs are widely used for user authentication. After a user logs in, the server generates a JWT containing user information. The client includes this JWT in subsequent requests to access protected resources.
+
+2. **Single Sign-On (SSO):**
+   - JWTs facilitate single sign-on across multiple services. Once a user authenticates with one service and receives a JWT, they can use it to access other services without re-authenticating.
+
+3. **Information Exchange:**
+   - JWTs are suitable for securely transmitting information between parties. They are often used in authorization and access control scenarios.
+
+4. **Stateless Sessions:**
+   - JWTs can represent session information, allowing for stateless sessions without the need for server-side storage.
+
+5. **Secure Data Exchange:**
+   - JWTs can be used to securely transmit data between a client and a server. The signature ensures that the data hasn't been tampered with during transmission.
+
+In summary, JSON Web Tokens provide a versatile and secure way to transmit information, especially for authentication and authorization purposes in web development. Their compact and self-contained nature makes them well-suited for modern, distributed architectures.
+
+Certainly! Below is a simple example demonstrating how to use `jwt.sign` to generate a JWT (token creation) and `jwt.verify` to verify and decode the JWT (token verification) using the `jsonwebtoken` library in a Node.js application.
+
+### Installation:
+
+Make sure to install the `jsonwebtoken` library:
+
+```bash
+npm install jsonwebtoken
+```
+
+### Example Code:
+
+```javascript
+const jwt = require('jsonwebtoken');
+// Secret key used for signing and verifying the JWT
+const secretKey = 'mySecretKey';
+
+// Sample user data
+const user = {
+  id: 123,
+  username: 'john_doe',
+  role: 'user',
+};
+
+// Creating a JWT (token creation)
+const token = jwt.sign(user, secretKey, { expiresIn: '1h' });
+console.log('Generated Token:', token);
+
+// Verifying and decoding the JWT (token verification)
+jwt.verify(token, secretKey, (err, decoded) => {
+  if (err) {
+    console.error('Verification Error:', err.message);
+    return;
+  }
+  console.log('Decoded Token:', decoded);
+});
+
+
+```
+
+### Explanation:
+
+1. **Secret Key:**
+   - You should use a strong, secret key for signing and verifying the JWT. In this example, the key is set to `'mySecretKey'`, but in a real-world scenario, you should use a more secure key and possibly store it in a secure environment.
+
+2. **Sample User Data:**
+   - The `user` object represents the data you want to include in the JWT. In this case, it includes `id`, `username`, and `role`.
+
+3. **Token Creation (`jwt.sign`):**
+   - The `jwt.sign` function is used to create a JWT. It takes the user data, secret key, and optional options (e.g., expiration time) as arguments.
+
+4. **Token Verification (`jwt.verify`):**
+   - The `jwt.verify` function is used to verify and decode the JWT. It takes the token, secret key, and a callback function as arguments. If the token is valid, the callback receives the decoded payload.
+
+5. **Expiration Time (`expiresIn`):**
+   - In this example, the token has an expiration time of 1 hour. After this time, the token will no longer be valid.
+
+### Note:
+- Always handle errors properly, especially during token verification. The `err` parameter in the callback of `jwt.verify` will be `null` if the verification is successful.
+
+- This is a basic example, and in a real-world scenario, you would typically generate a token during the authentication process and then use that token for subsequent requests to access protected resources.
+
+- Ensure that the secret key is kept secret and never exposed to clients.
+
+This example provides a straightforward illustration of how to use `jwt.sign` and `jwt.verify` for token creation and verification.
+
+### bearer token
+
+A bearer token is a type of access token that is typically used in the OAuth 2.0 authentication framework. It is called a "bearer" token because the bearer of the token is granted access. In other words, whoever possesses the token is assumed to have the right to access the associated resources.
+
+Bearer tokens are commonly used for securing API endpoints and providing access to protected resources. They are transmitted in HTTP headers during requests to authenticate and authorize the requester.
+
+### Example Usage in HTTP Header:
+
+When making a request to a protected resource, the bearer token is included in the HTTP Authorization header. The format typically looks like this:
+
+```
+Authorization: Bearer <token>
+```
+
+
+
+## WebSockets vs Socket.io
+
+WebSockets is a communication protocol that enables two-way, real-time communication between a client and a server. It establishes a full-duplex communication channel over a single TCP connection, allowing data to be sent and received simultaneously 12.
+
+Socket.IO is a library that provides an abstraction layer on top of WebSockets, making it easier to create real-time applications. It offers additional features such as automatic reconnection, event-based notifications, and more 134.
+
+In summary, WebSockets is a low-level protocol that provides a direct communication channel between a client and a server, while Socket.IO is a higher-level library that provides additional features on top of WebSockets to make it easier to build real-time applications.
+
+1. **Transport Protocols:**
+   - **WebSocket:**
+     - WebSocket is a communication protocol that provides a full-duplex communication channel over a single, long-lived connection.
+     - It operates directly on top of the TCP protocol.
+   - **Socket.IO:**
+     - Socket.IO uses WebSocket as its primary transport, but it has a built-in abstraction layer that allows it to use other transport methods like long polling.
+
+2. **Fallback Mechanisms:**
+   - **WebSocket:**
+     - WebSocket doesn't have built-in fallback mechanisms. If a WebSocket connection is not supported or is blocked, the communication fails.
+   - **Socket.IO:**
+     - Socket.IO includes fallback mechanisms, such as HTTP long polling, that allow communication to continue even in environments where WebSocket connections are restricted.
+
+3. **Ease of Use:**
+   - **WebSocket:**
+     - WebSocket is a lower-level protocol, and implementing it directly requires more effort. Libraries like `ws` in Node.js simplify WebSocket usage.
+   - **Socket.IO:**
+     - Socket.IO is designed for ease of use. Its event-driven model and abstraction layer make it simpler to implement real-time communication without dealing with the complexities of raw WebSocket.
+
+4. **Features:**
+   - **WebSocket:**
+     - WebSocket is a protocol for real-time, bidirectional communication but lacks some of the higher-level features provided by Socket.IO.
+   - **Socket.IO:**
+     - Socket.IO builds on WebSocket and adds features like event-based communication, room and namespace support, and automatic fallback mechanisms.
+
+5. **Use Cases:**
+   - **WebSocket:**
+     - Suitable for scenarios where direct, raw WebSocket communication is sufficient, and fallback mechanisms are not a requirement.
+   - **Socket.IO:**
+     - Suitable for applications where real-time communication is critical, and the ability to fallback to other transports is important for compatibility in diverse network environments.
+
+
+
+### 1. Introduction to Socket:
+
+**Socket:**
+- A socket is a communication endpoint that allows data to be exchanged between processes or devices over a network.
+- In the context of Node.js, the term "socket" often refers to the use of WebSockets or the `net` module for handling TCP sockets.
+
+**Socket.IO** is a JavaScript library that enables real-time, bidirectional communication between clients (typically web browsers) and servers. It is built on top of the WebSocket protocol but provides additional features and fallback mechanisms to support various transport methods, including WebSocket, HTTP long polling, and more.
+
+#### 2. Need for Sockets:
+
+**Why Sockets:**
+- Sockets enable real-time, bidirectional communication between a client and a server.
+- Traditional HTTP communication is request-response-based, which may not be efficient for scenarios requiring instant updates, such as chat applications, live notifications, and collaborative editing.
+
+**Use Cases:**
+- Chat applications.
+- Real-time dashboards.
+- Multiplayer online games.
+- Live notifications and updates.
+
+#### 3. Difference between HTTP and Socket:
+
+**HTTP:**
+- **Request-Response Model:** HTTP is based on a request-response model, where a client sends a request, and the server responds.
+- **Stateless:** Each HTTP request is stateless, meaning it doesn't maintain information about previous requests.
+- **Connection per Request:** Typically, a new connection is established for each request, which can be inefficient for real-time communication.
+
+**Socket:**
+- **Full-Duplex Communication:** Sockets allow full-duplex communication, meaning both the client and server can send data independently at any time.
+- **Persistent Connection:** Sockets maintain a persistent connection, eliminating the need to establish a new connection for each data exchange.
+- **Real-Time Updates:** Sockets are well-suited for scenarios requiring real-time updates and bidirectional communication.
+
+
+### Key Features of Socket.IO:
+
+1. **Real-time Bidirectional Communication:**
+   - Socket.IO enables real-time communication between clients and servers, allowing instant data exchange.
+
+2. **WebSocket Support:**
+   - While Socket.IO uses WebSocket as its primary transport method, it can automatically fall back to other transport protocols if WebSocket is not supported.
+
+3. **Fallback Mechanisms:**
+   - Socket.IO includes fallback mechanisms, such as long polling, to maintain communication even in environments where direct WebSocket connections might be restricted.
+
+4. **Event-Based Communication:**
+   - Communication in Socket.IO is event-driven. Clients and servers can emit events and listen for events, making it easy to send and receive messages.
+
+5. **Room and Namespace Support:**
+   - Socket.IO supports the concept of rooms and namespaces, allowing you to organize communication channels and target messages to specific groups of clients.
+
+
+## Step-1
+
+//server side
+```javascript
+const express = require('express')
+const socket = require('socket.io')
+const app = express()
+const server = app.listen(5000, () => {
+  console.log('server started')
+})
+
+// Attach Socket.IO to the server with CORS configuration
+const io = socket(server, {
+  cors: {
+    origin: "*"
+  }
+})
+
+// Event listener for new socket connections
+io.on('connection', socketClient => {
+
+  console.log(socketClient.id,"clients id")
+
+  // Event listener for 'MESSAGE' event from the client
+  socketClient.on('MESSAGE', (clientdata) => {
+    console.log(clientdata,"client data is coming ")
+    socketClient.emit('Client', clientdata)
+  })
+
+})
+
+app.get('/', (req, res) => {
+  res.send('home page')
+})
+
+```
+
+//client side
+
+```javascript
+import React, { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+// Create a socket connection to the server
+const socket = io('http://localhost:5000/');
+
+const App = () => {
+
+  //see the data in frontend 
+  useEffect(() => {
+    socket.on('Client', (data) => {
+      console.log(data,"data");
+    });
+  }, []); 
+
+   // Event handler for sending a message
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    socket.emit('MESSAGE', "Hello how are you");
+  }
+
+  return (
+    <div>
+      <div style={{textAlign:"center"}}>
+        Socket client side
+        <br/>
+         {/* Button for sending a regular message */}
+        <button style={{border:"2px solid black",backgroundColor:"pink", width:"300px"}} onClick={handleSendMessage}>Send Message</button>
+        <hr />
+  );
+};
+
+export default App;
+
+```
+
+### //update clent side with input field
+
+```javascript
+
+import React, { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+// Create a socket connection to the server
+const socket = io('http://localhost:5000/');
+
+const App = () => {
+  const [inputValue, setInputValue] = useState('');
+  const [receivedMessages, setReceivedMessages] = useState([]);
+
+   // Event listeners for various socket events
+  useEffect(() => {
+    socket.on('Client', (data) => {
+      console.log(data,"data");
+      setReceivedMessages(data);
+    });
+  }, []); 
+  
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+  }
+
+   // Event handler for sending a message
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    console.log(inputValue,"input value");
+    socket.emit('MESSAGE', inputValue);
+  }
+
+  return (
+    <div>
+      <div style={{textAlign:"center"}}>
+        Socket client side
+        <br/>
+       
+        <input type='text' name='msg' value={inputValue} onChange={handleChange}/><hr/>
+         {/* Button for sending a regular message */}
+        <button style={{border:"2px solid black",backgroundColor:"pink", width:"300px"}} onClick={handleSendMessage}>Send Message</button>
+        <hr />
+      
+        <hr />
+       <h1>redata: {receivedMessages}</h1>
+      </div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+
+
+## Full code of socket
+
+
+//server side code 
+```javascript
+const express = require('express')
+const socket = require('socket.io')
+const app = express()
+const server = app.listen(5000, () => {
+  console.log('server started')
+})
+
+// Attach Socket.IO to the server with CORS configuration
+const io = socket(server, {
+  cors: {
+    origin: "*"
+  }
+})
+
+// Event listener for new socket connections
+io.on('connection', socketClient => {
+
+  console.log(socketClient.id,"clients id")
+
+  // Event listener for 'MESSAGE' event from the client
+  socketClient.on('MESSAGE', clientdata => {
+    console.log(clientdata,"clientdata")
+    socketClient.emit('Client', clientdata)
+  })
+
+  socketClient.on('BROADCAST', clientdataBroadcast => {
+    console.log(clientdataBroadcast)
+    io.emit('sendmsgtoall', clientdataBroadcast)
+  })
+  socketClient.on('EXCLUSIVEBROADCAST', clientdataBroadcast => {
+    console.log(clientdataBroadcast)
+    socketClient.broadcast.emit('EXCLUSIVEBROADCAST', clientdataBroadcast)
+  })
+
+   // Event listener for 'JOINROOM' event from the client
+  socketClient.on('JOINROOM', (ClientRoom) => {
+    console.log(ClientRoom)
+    socketClient.join(ClientRoom)
+    io.to(ClientRoom).emit('JOINROOMSUCCESS', 'joined success')
+
+    // Event listener for 'sendroommessage' event from the client
+    socketClient.on('sendroommessage', (clientdata) => {
+      io.to(ClientRoom).emit("sendtoroomMessage",clientdata)
+    })
+  })
+})
+
+app.get('/', (req, res) => {
+  res.send('home page')
+})
+```
+
+//client side code
+
+```javascript
+
+
+import React, { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+// Create a socket connection to the server
+const socket = io('http://localhost:5000/');
+
+const App = () => {
+  const [inputValue, setInputValue] = useState('');
+  const [receivedMessages, setReceivedMessages] = useState([]);
+  // const socket = io('http://localhost:5000/');
+
+   // Event listeners for various socket events
+  useEffect(() => {
+    socket.on('Client', (data) => {
+      console.log(data);
+    });
+    socket.on('sendmsgtoall', (data) => {
+      console.log(data);
+    });
+    socket.on('EXCLUSIVEBROADCAST', (data) => {
+      console.log(data);
+    });
+    socket.on('sendtoroomMessage', (data) => {
+     console.log(data)
+    });
+    socket.on('JOINROOMSUCCESS', (data) => {
+      console.log(data);
+    });
+  }, []); 
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+  }
+
+   // Event handler for sending a message
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    console.log(inputValue);
+    socket.emit('MESSAGE', inputValue);
+  }
+
+   // Event handler for broadcasting a message to all participants
+  const handleBroadcast = (e) => {
+    e.preventDefault();
+    socket.emit('BROADCAST', inputValue);
+  }
+
+  const handleExclusiveBroadcast = (e) => {
+    e.preventDefault();
+    socket.emit('EXCLUSIVEBROADCAST', inputValue);
+  }
+  const joinRoom = (e) => {
+    e.preventDefault();
+    let roomName = prompt('Please provide a room name:');
+    socket.emit('JOINROOM', roomName);
+  }
+
+  const sendToRoom = (e) => {
+     e.preventDefault();
+     console.log("cliecked",inputValue)
+    socket.emit('sendroommessage', inputValue);
+  }
+  return (
+    <div>
+      <div style={{textAlign:"center"}}>
+        Socket client side
+        <br/>
+       
+        <input
+          type='text'
+          name='msg'
+          value={inputValue}
+          onChange={handleChange}
+        /><hr/>
+         {/* Button for sending a regular message */}
+        <button style={{border:"2px solid black",backgroundColor:"pink", width:"300px"}} onClick={handleSendMessage}>Send Message</button>
+        <hr />
+        <button style={{border:"2px solid black",backgroundColor:"pink" , width:"300px"}} onClick={handleBroadcast}>Send To all participants</button>
+        <hr />
+        <button style={{border:"2px solid black",
+        backgroundColor:"pink", width:"300px"}} onClick={handleExclusiveBroadcast}>
+          Send To all EXCLUSIVEBROADCAST
+        </button>
+        <hr />
+        <button style={{border:"2px solid black",backgroundColor:"pink", width:"300px"}} onClick={joinRoom}>Join Room</button>
+        <hr />
+        <button style={{border:"2px solid black",backgroundColor:"pink",width:"300px"}} onClick={sendToRoom}>
+          Send To all friends who have joined the room
+        </button>
+      
+        <hr />
+        {receivedMessages}
+      </div>
+    </div>
+  );
+};
+
+export default App;
+
+```
+
